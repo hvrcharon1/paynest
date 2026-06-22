@@ -1,0 +1,20 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayNest logo">
+  <defs>
+    <linearGradient id="nestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#5B21B6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- nest: three woven arcs -->
+  <path d="M6,38 Q6,53 32,53 Q58,53 58,38" fill="none" stroke="url(#nestGrad)" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M11,32 Q11,48 32,48 Q53,48 53,32" fill="none" stroke="#8B5CF6" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+  <path d="M16,27 Q16,43 32,43 Q48,43 48,27" fill="none" stroke="#A78BFA" stroke-width="3.5" stroke-linecap="round" opacity="0.35"/>
+
+  <!-- payment card cradled in the nest -->
+  <g transform="translate(32 26) rotate(-6)">
+    <rect x="-13" y="-9" width="26" height="18" rx="4" fill="#0A0E1A" stroke="#F1F5F9" stroke-width="2"/>
+    <rect x="-13" y="-3.5" width="26" height="3.5" fill="#7C3AED"/>
+    <circle cx="6" cy="5.5" r="2.2" fill="#34D399"/>
+  </g>
+</svg>
