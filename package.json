@@ -3,7 +3,6 @@
   "private": true,
   "version": "1.0.0",
   "description": "One nest for every payment you owe — manage payment methods, autopay every bill, and get AI-powered insight into your cash flow.",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
