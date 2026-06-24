@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { AppNotification, ExternalService, PaymentMethod } from '@/types'
+import type { AppNotification, ExternalService, OAuthConnection, PaymentMethod } from '@/types'
 import { seedPaymentMethods, seedServices } from '@/data/mockData'
 import { computeNextDueDate, daysUntil, generateId } from '@/lib/utils'
 
@@ -8,6 +8,7 @@ interface AppState {
   paymentMethods: PaymentMethod[]
   services: ExternalService[]
   notifications: AppNotification[]
+  oauthConnections: OAuthConnection[]
   hasOnboarded: boolean
 
   // payment methods
@@ -26,6 +27,12 @@ interface AppState {
   markNotificationRead: (id: string) => void
   clearNotifications: () => void
   refreshNotifications: () => void
+
+  // oauth connections
+  addOAuthConnection: (conn: OAuthConnection) => void
+  updateOAuthConnection: (id: string, patch: Partial<OAuthConnection>) => void
+  removeOAuthConnection: (id: string) => void
+  revokeOAuthConnection: (id: string) => void
 
   resetDemoData: () => void
 }
@@ -74,6 +81,7 @@ export const useAppStore = create<AppState>()(
       paymentMethods: seedPaymentMethods,
       services: seedServices.map((s) => ({ ...s, status: deriveStatus(s) })),
       notifications: buildNotificationsFromServices(seedServices),
+      oauthConnections: [],
       hasOnboarded: true,
 
       addPaymentMethod: (pm) =>
@@ -142,6 +150,39 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           services: state.services.map((s) => ({ ...s, status: deriveStatus(s) })),
           notifications: buildNotificationsFromServices(state.services),
+        })),
+
+      // ── OAuth connections ──────────────────────────────────────────────────
+
+      addOAuthConnection: (conn) =>
+        set((state) => ({
+          // Replace if same id, otherwise append
+          oauthConnections: [...state.oauthConnections.filter((c) => c.id !== conn.id), conn],
+        })),
+
+      updateOAuthConnection: (id, patch) =>
+        set((state) => ({
+          oauthConnections: state.oauthConnections.map((c) =>
+            c.id === id ? { ...c, ...patch } : c
+          ),
+        })),
+
+      removeOAuthConnection: (id) =>
+        set((state) => ({
+          oauthConnections: state.oauthConnections.filter((c) => c.id !== id),
+          // Clear the reference from any service using this connection
+          services: state.services.map((s) =>
+            s.oauthConnectionId === id
+              ? { ...s, oauthConnectionId: undefined, integrationTier: 'none' as const }
+              : s
+          ),
+        })),
+
+      revokeOAuthConnection: (id) =>
+        set((state) => ({
+          oauthConnections: state.oauthConnections.map((c) =>
+            c.id === id ? { ...c, status: 'revoked' as const } : c
+          ),
         })),
 
       resetDemoData: () =>
