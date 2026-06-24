@@ -6,6 +6,7 @@ import CalendarPage from '@/pages/Calendar'
 import Analytics from '@/pages/Analytics'
 import AIAssistant from '@/pages/AIAssistant'
 import Settings from '@/pages/Settings'
+import OAuthCallback from '@/pages/OAuthCallback'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/assistant" element={<AIAssistant />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/oauth/callback" element={<OAuthCallback />} />
     </Routes>
   )
 }
