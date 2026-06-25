@@ -8,8 +8,8 @@ export interface PaymentMethod {
   label: string
   /** Last 4 digits for cards/accounts, or handle for wallets */
   identifier: string
-  brand?: string // visa, mastercard, amex, upi, paypal, etc.
-  expiry?: string // MM/YY, cards only
+  brand?: string
+  expiry?: string
   isDefault: boolean
   createdAt: string
 }
@@ -29,9 +29,13 @@ export type ServiceCategory =
   | 'school_fee'
   | 'p2p'
   | 'vehicle_rental'
+  | 'credit_card'
   | 'other'
 
 export type Frequency = 'monthly' | 'weekly' | 'biweekly' | 'quarterly' | 'annually' | 'one_time'
+
+/** How the user wants to pay their credit card each billing cycle. */
+export type CreditCardPaymentType = 'minimum' | 'statement' | 'custom'
 
 // ---------- Integration tiers ----------
 
@@ -40,7 +44,7 @@ export type IntegrationTier = 'none' | 'portal' | 'oauth'
 export interface ExternalService {
   id: string
   category: ServiceCategory
-  /** Display name, e.g. "Chase Auto Loan" or "Riverside Apartments" */
+  /** Display name, e.g. "Chase Sapphire Reserve" */
   providerName: string
   /** Free-text account / reference number with the provider */
   accountRef: string
@@ -62,6 +66,12 @@ export interface ExternalService {
   loginId?: string
   loginPassword?: string   // stored locally — never sent to any server
   oauthConnectionId?: string
+  // Credit card specific fields (only populated when category === 'credit_card')
+  creditLimit?: number
+  statementBalance?: number
+  minimumPayment?: number
+  apr?: number
+  cardPaymentType?: CreditCardPaymentType
 }
 
 // ---------- OAuth ----------
