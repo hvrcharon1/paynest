@@ -74,7 +74,7 @@ export interface ExternalService {
   cardPaymentType?: CreditCardPaymentType
 }
 
-// ---------- OAuth ----------
+// ---------- OAuth (third-party bill providers, e.g. PayPal/Plaid) ----------
 
 export interface OAuthProvider {
   id: string
@@ -159,4 +159,20 @@ export interface CategoryMeta {
   label: string
   icon: string // lucide icon name, resolved in component
   color: string
+}
+
+// ---------- User authentication ----------
+
+/** How the signed-in user authenticated. */
+export type AuthProviderType = 'email' | 'google'
+
+/** The signed-in PayNest user. Not to be confused with `OAuthConnection`,
+ *  which represents a connected bill provider (PayPal, Plaid, etc). */
+export interface AuthUser {
+  id: string
+  name: string
+  email: string
+  avatarUrl?: string
+  provider: AuthProviderType
+  createdAt: string
 }
