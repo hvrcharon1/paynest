@@ -33,6 +33,10 @@ export type ServiceCategory =
 
 export type Frequency = 'monthly' | 'weekly' | 'biweekly' | 'quarterly' | 'annually' | 'one_time'
 
+// ---------- Integration tiers ----------
+
+export type IntegrationTier = 'none' | 'portal' | 'oauth'
+
 export interface ExternalService {
   id: string
   category: ServiceCategory
@@ -52,6 +56,44 @@ export interface ExternalService {
   nextDueDate: string // ISO date
   createdAt: string
   notes?: string
+  // Integration fields (all optional — default tier is 'none')
+  integrationTier?: IntegrationTier
+  portalUrl?: string
+  loginId?: string
+  loginPassword?: string   // stored locally — never sent to any server
+  oauthConnectionId?: string
+}
+
+// ---------- OAuth ----------
+
+export interface OAuthProvider {
+  id: string
+  name: string
+  description: string
+  authUrl: string
+  tokenUrl: string
+  scope: string
+  logoColor: string
+  logoInitials: string
+  /** When true, a backend server holding a client_secret is required. */
+  requiresBackend: boolean
+  isCustom?: boolean
+  categories: ServiceCategory[]
+}
+
+export interface OAuthConnection {
+  id: string
+  providerId: string
+  providerName: string
+  clientId: string
+  accessToken: string
+  refreshToken?: string
+  expiresAt?: string       // ISO datetime
+  scope: string
+  status: 'active' | 'expired' | 'revoked'
+  connectedAt: string
+  /** Sentinel — this connection is device-bound and never sent to paynest servers. */
+  isLocalOnly: true
 }
 
 // ---------- Payment history ----------

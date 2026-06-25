@@ -11,6 +11,7 @@ import type { ServiceCategory } from '@/types'
 export default function Services() {
   const services = useAppStore((s) => s.services)
   const paymentMethods = useAppStore((s) => s.paymentMethods)
+  const oauthConnections = useAppStore((s) => s.oauthConnections)
   const toggleAutopay = useAppStore((s) => s.toggleAutopay)
   const updateService = useAppStore((s) => s.updateService)
   const removeService = useAppStore((s) => s.removeService)
@@ -56,6 +57,7 @@ export default function Services() {
               key={svc.id}
               service={svc}
               paymentMethod={paymentMethods.find((pm) => pm.id === svc.paymentMethodId)}
+              oauthConnection={oauthConnections.find((c) => c.id === svc.oauthConnectionId)}
               onToggleAutopay={toggleAutopay}
               onPauseToggle={handlePauseToggle}
               onRemove={removeService}
