@@ -58,7 +58,7 @@ export const OAUTH_PROVIDERS: OAuthProvider[] = [
     categories: [
       'loan', 'rent', 'water', 'electricity', 'internet',
       'health_insurance', 'dental_insurance', 'car_insurance',
-      'citation', 'school_fee', 'p2p', 'vehicle_rental', 'other',
+      'citation', 'school_fee', 'p2p', 'vehicle_rental', 'credit_card', 'other',
     ],
   },
 ]
