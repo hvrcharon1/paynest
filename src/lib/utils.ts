@@ -27,6 +27,21 @@ export function computeNextDueDate(dueDay: number, frequency: string, from: Date
   const base = new Date(from)
   base.setHours(0, 0, 0, 0)
 
+  // Weekly and biweekly: anchor to this month's dueDay then step forward
+  // by 7 or 14 days until we land on a date that is on/after `base`.
+  if (frequency === 'weekly' || frequency === 'biweekly') {
+    const daysStep = frequency === 'weekly' ? 7 : 14
+    const anchor = new Date(base.getFullYear(), base.getMonth(), dueDay)
+    // Clamp if dueDay overflows the month (e.g. Feb 30 → Feb 28)
+    if (anchor.getDate() !== dueDay) {
+      anchor.setMonth(anchor.getMonth(), 0)
+    }
+    while (anchor.getTime() < base.getTime()) {
+      anchor.setDate(anchor.getDate() + daysStep)
+    }
+    return anchor.toISOString().slice(0, 10)
+  }
+
   const monthsToAdd = frequency === 'quarterly' ? 3 : frequency === 'annually' ? 12 : 1
 
   const candidate = new Date(base.getFullYear(), base.getMonth(), dueDay)
