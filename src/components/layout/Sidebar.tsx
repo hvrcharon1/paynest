@@ -22,7 +22,7 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   return (
-    <aside className="hidden md:flex md:flex-col w-64 shrink-0 border-r border-border bg-bg-surface/60 h-screen sticky top-0">
+    <aside className="hidden md:flex md:flex-col w-64 shrink-0 border-r border-border bg-bg-surface/60 h-full overflow-hidden">
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-border">
         <img src="/logo.svg" alt="PayNest" className="h-8 w-8" />
         <span className="font-display font-bold text-lg text-text-primary tracking-tight">PayNest</span>

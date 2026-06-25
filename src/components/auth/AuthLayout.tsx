@@ -56,8 +56,8 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
         </div>
       </div>
 
-      {/* Form panel */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-10">
+      {/* Form panel — scrollable so tall forms (e.g. Signup) never clip */}
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-10 overflow-y-auto">
         <div className="w-full max-w-md animate-fade-in">
           <div className="flex lg:hidden items-center gap-2.5 mb-8 justify-center">
             <img src="/logo.svg" alt="PayNest" className="h-9 w-9" />
