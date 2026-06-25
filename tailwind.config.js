@@ -57,10 +57,20 @@ module.exports = {
           '0%': { strokeDashoffset: 'var(--ring-circumference)' },
           '100%': { strokeDashoffset: 'var(--ring-offset)' },
         },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-18px)' },
+        },
+        'float-slow': {
+          '0%, 100%': { transform: 'translateY(0px) translateX(0px)' },
+          '50%': { transform: 'translateY(14px) translateX(-10px)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out',
         'ring-fill': 'ring-fill 1s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        float: 'float 6s ease-in-out infinite',
+        'float-slow': 'float-slow 9s ease-in-out infinite',
       },
     },
   },
