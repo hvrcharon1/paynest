@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.svg" alt="PayNest logo" width="96" height="96" />
+  <img src="public/paynest-banner-animated.svg" alt="PayNest — one nest for every payment you owe" width="640" />
 
   # PayNest
 
