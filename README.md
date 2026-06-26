@@ -16,17 +16,6 @@
 
 ---
 
-## See it in motion
-
-Two ad-style previews walk through the PayNest story — from bill chaos to the AI-powered dashboard. They're built as self-contained, looping HTML/CSS/JS animations (no video file, no plugins, no dependencies beyond a browser):
-
-- 🎬 **[10-second cut](marketing/paynest-10s-ad.html)** — problem → reveal → health ring → CTA
-- 🎬 **[30-second cut](marketing/paynest-30s-ad.html)** — the full tour, including the AI assistant answering a real question
-
-> **Note:** GitHub strips `<script>`/`<style>` tags when rendering Markdown, so these won't animate on this page itself. To actually watch them: download the file and open it in a browser, enable GitHub Pages for this repo, or use a live-raw-HTML viewer such as raw.githack.com, e.g. `https://raw.githack.com/hvrcharon1/paynest/main/marketing/paynest-30s-ad.html`.
-
----
-
 ## Why PayNest?
 
 Most people track their bills across a dozen different places — a bank portal here, a utility site there, a sticky note on the fridge for good measure. Every month is a scramble to remember what's due, what's already paid, and what card is on file where.
