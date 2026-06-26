@@ -1,0 +1,23 @@
+-- ============================================================
+-- PayNest DB  |  Step 1: Tablespaces
+-- Run as   :  SYS AS SYSDBA  (connected to FREEPDB1)
+-- Status   :  ALREADY APPLIED (2026-06-25 via MCP)
+-- ============================================================
+
+-- Data tablespace  (100 MB, autoextend up to 2 GB)
+CREATE TABLESPACE paynest_data
+  DATAFILE 'C:\APP\16076\PRODUCT\23AI\ORADATA\FREE\FREEPDB1\PAYNEST_DATA01.DBF'
+  SIZE 100M
+  AUTOEXTEND ON NEXT 50M MAXSIZE 2048M
+  LOGGING
+  EXTENT MANAGEMENT LOCAL AUTOALLOCATE
+  SEGMENT SPACE MANAGEMENT AUTO;
+
+-- Index tablespace (50 MB, autoextend up to 1 GB)
+CREATE TABLESPACE paynest_idx
+  DATAFILE 'C:\APP\16076\PRODUCT\23AI\ORADATA\FREE\FREEPDB1\PAYNEST_IDX01.DBF'
+  SIZE 50M
+  AUTOEXTEND ON NEXT 25M MAXSIZE 1024M
+  LOGGING
+  EXTENT MANAGEMENT LOCAL AUTOALLOCATE
+  SEGMENT SPACE MANAGEMENT AUTO;
