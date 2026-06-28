@@ -103,12 +103,12 @@ CREATE TABLE paynest.notifications (
   message    VARCHAR2(1000),
   service_id VARCHAR2(50),
   created_at TIMESTAMP      DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  read       NUMBER(1)      DEFAULT 0 NOT NULL,
+  is_read    NUMBER(1)      DEFAULT 0 NOT NULL,
   CONSTRAINT pk_notifications  PRIMARY KEY (id)         USING INDEX TABLESPACE paynest_idx,
   CONSTRAINT fk_notif_user     FOREIGN KEY (user_id)    REFERENCES paynest.users(id)             ON DELETE CASCADE,
   CONSTRAINT fk_notif_svc      FOREIGN KEY (service_id) REFERENCES paynest.external_services(id)  ON DELETE SET NULL,
   CONSTRAINT chk_notif_kind    CHECK (kind IN ('due_soon', 'overdue', 'autopay_success', 'autopay_failed', 'ai_insight')),
-  CONSTRAINT chk_notif_read    CHECK (read IN (0, 1))
+  CONSTRAINT chk_notif_read    CHECK (is_read IN (0, 1))
 ) TABLESPACE paynest_data;
 
 -- ── PAYMENT_HISTORY ──────────────────────────────────────────
@@ -148,6 +148,6 @@ CREATE INDEX idx_oauth_user_id   ON paynest.oauth_connections  (user_id)        
 CREATE INDEX idx_svc_user_id     ON paynest.external_services  (user_id)                          TABLESPACE paynest_idx;
 CREATE INDEX idx_svc_next_due    ON paynest.external_services  (user_id, next_due_date)            TABLESPACE paynest_idx;
 CREATE INDEX idx_svc_status      ON paynest.external_services  (user_id, status)                  TABLESPACE paynest_idx;
-CREATE INDEX idx_notif_user_id   ON paynest.notifications      (user_id, read)                    TABLESPACE paynest_idx;
+CREATE INDEX idx_notif_user_id   ON paynest.notifications      (user_id, is_read)                  TABLESPACE paynest_idx;
 CREATE INDEX idx_hist_user_id    ON paynest.payment_history     (user_id)                          TABLESPACE paynest_idx;
 CREATE INDEX idx_insights_user   ON paynest.ai_insights         (user_id, generated_at DESC)       TABLESPACE paynest_idx;

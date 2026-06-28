@@ -4,6 +4,7 @@ import type { AuthUser, AuthProviderType } from '@/types'
 import { generateId } from '@/lib/utils'
 import { hashPassword } from '@/lib/auth'
 import { signInWithGoogle as googleSignIn } from '@/lib/googleAuth'
+import { api } from '@/lib/api'
 
 /** Internal record — never exposed outside the store as-is (passwordHash stays in). */
 interface StoredAccount {
@@ -45,6 +46,26 @@ export const useAuthStore = create<AuthState>()(
 
       signUp: async ({ name, email, password }) => {
         const normalizedEmail = email.trim().toLowerCase()
+        const passwordHash = await hashPassword(password)
+
+        // Try API first
+        try {
+          const apiUser = await api.signUp(name, normalizedEmail, passwordHash)
+          const account: StoredAccount = {
+            id: apiUser.id,
+            name: apiUser.name,
+            email: apiUser.email,
+            passwordHash,
+            avatarUrl: apiUser.avatarUrl ?? undefined,
+            createdAt: apiUser.createdAt,
+          }
+          const user = toAuthUser(account, 'email')
+          set((state) => ({ accounts: [...state.accounts, account], user }))
+          return user
+        } catch {
+          // Fallback to local-only
+        }
+
         if (get().accounts.some((a) => a.email === normalizedEmail)) {
           throw new Error('An account with this email already exists. Try signing in instead.')
         }
@@ -53,7 +74,7 @@ export const useAuthStore = create<AuthState>()(
           id: generateId('user'),
           name: name.trim(),
           email: normalizedEmail,
-          passwordHash: await hashPassword(password),
+          passwordHash,
           createdAt: new Date().toISOString(),
         }
 
@@ -64,6 +85,31 @@ export const useAuthStore = create<AuthState>()(
 
       signIn: async ({ email, password }) => {
         const normalizedEmail = email.trim().toLowerCase()
+        const passwordHash = await hashPassword(password)
+
+        // Try API first
+        try {
+          const apiUser = await api.signIn(normalizedEmail, passwordHash)
+          const account: StoredAccount = {
+            id: apiUser.id,
+            name: apiUser.name,
+            email: apiUser.email,
+            passwordHash,
+            avatarUrl: apiUser.avatarUrl ?? undefined,
+            createdAt: apiUser.createdAt,
+          }
+          const user = toAuthUser(account, 'email')
+          set((state) => ({
+            accounts: state.accounts.some((a) => a.id === account.id)
+              ? state.accounts.map((a) => (a.id === account.id ? account : a))
+              : [...state.accounts, account],
+            user,
+          }))
+          return user
+        } catch {
+          // Fallback to local-only
+        }
+
         const account = get().accounts.find((a) => a.email === normalizedEmail)
         if (!account) {
           throw new Error('No account found with that email. Try creating one instead.')
@@ -72,7 +118,6 @@ export const useAuthStore = create<AuthState>()(
           throw new Error('This account uses Google sign-in. Continue with Google below.')
         }
 
-        const passwordHash = await hashPassword(password)
         if (passwordHash !== account.passwordHash) {
           throw new Error('Incorrect password. Please try again.')
         }

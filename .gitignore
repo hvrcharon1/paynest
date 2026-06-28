@@ -28,3 +28,6 @@ yarn-error.log*
 # Compiled vite config artifacts
 vite.config.d.ts
 vite.config.js
+
+# Package lock at root (each sub-project has its own)
+/package-lock.json

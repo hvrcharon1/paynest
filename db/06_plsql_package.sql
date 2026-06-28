@@ -1,7 +1,7 @@
 -- ============================================================
 -- PayNest DB  |  Step 6: PAYNEST_API_PKG  (spec + body)
 -- Run as   :  PAYNEST (schema owner)
--- Status   :  PENDING — run this script to complete setup
+-- Status   :  DEPLOYED (2026-06-28 via MCP)
 -- ============================================================
 
 -- ── Package Specification ────────────────────────────────────
@@ -111,7 +111,7 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
       WHERE  user_id = p_user_id AND status != 'paused';
   BEGIN
     DELETE FROM paynest.notifications
-    WHERE  user_id = p_user_id AND read = 0;
+    WHERE  user_id = p_user_id AND is_read = 0;
 
     FOR r IN c_svcs LOOP
       v_days := TRUNC(r.next_due_date) - TRUNC(SYSDATE);
@@ -119,7 +119,7 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
       IF r.status = 'overdue' THEN
         v_id := 'notif_' || LOWER(RAWTOHEX(SYS_GUID()));
         INSERT INTO paynest.notifications
-               (id, user_id, kind, title, message, service_id, created_at, read)
+               (id, user_id, kind, title, message, service_id, created_at, is_read)
         VALUES (v_id, p_user_id, 'overdue',
                 r.provider_name || ' is overdue',
                 'Payment was due ' || TO_CHAR(r.next_due_date, 'YYYY-MM-DD') || '.',
@@ -128,7 +128,7 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
       ELSIF v_days >= 0 AND v_days <= r.notify_days_before THEN
         v_id := 'notif_' || LOWER(RAWTOHEX(SYS_GUID()));
         INSERT INTO paynest.notifications
-               (id, user_id, kind, title, message, service_id, created_at, read)
+               (id, user_id, kind, title, message, service_id, created_at, is_read)
         VALUES (v_id, p_user_id, 'due_soon',
                 r.provider_name || ' due in ' || v_days || ' day' ||
                   CASE WHEN v_days = 1 THEN '' ELSE 's' END,

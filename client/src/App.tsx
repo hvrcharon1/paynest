@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Dashboard from '@/pages/Dashboard'
 import PaymentMethods from '@/pages/PaymentMethods'
@@ -10,8 +11,19 @@ import OAuthCallback from '@/pages/OAuthCallback'
 import Login from '@/pages/Login'
 import Signup from '@/pages/Signup'
 import { RequireAuth } from '@/components/auth/RequireAuth'
+import { useAppStore } from '@/store/useStore'
+import { useAuthStore } from '@/store/useAuthStore'
 
 export default function App() {
+  const syncFromApi = useAppStore((s) => s.syncFromApi)
+  const user = useAuthStore((s) => s.user)
+
+  useEffect(() => {
+    if (user) {
+      syncFromApi()
+    }
+  }, [user, syncFromApi])
+
   return (
     <Routes>
       {/* Public */}
