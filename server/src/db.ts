@@ -42,6 +42,10 @@ export async function initPool(): Promise<void> {
 
   oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT
   oracledb.autoCommit = false
+  // Fetch CLOB columns as plain strings instead of Lob stream objects.
+  // Lob objects contain circular references that crash JSON.stringify.
+  // Affects: ai_insights.detail, external_services.notes
+  oracledb.fetchAsString = [oracledb.CLOB]
 
   const user          = process.env.ORACLE_USER          || 'PAYNEST_APP'
   const password      = process.env.ORACLE_PASSWORD       || 'paynest2026'

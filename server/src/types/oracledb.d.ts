@@ -42,8 +42,10 @@ declare module 'oracledb' {
   }
 
   const OUT_FORMAT_OBJECT: number
+  const CLOB: number
   let outFormat: number
   let autoCommit: boolean
+  let fetchAsString: number[]
 
   function createPool(attrs: PoolAttributes): Promise<Pool>
   function getPool(): Pool
