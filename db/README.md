@@ -19,12 +19,15 @@ Connection string: `localhost/FREEPDB1`
 
 ## Users
 
-| Username | Password | Purpose |
-|----------|----------|---------|
-| `PAYNEST` | `paynest2026` | Schema owner — all DDL and DML |
-| `PAYNEST_APP` | `paynest2026` | API runtime — DML on all tables |
-| `PAYNEST_RO` | `paynest2026` | Analytics — SELECT only |
-| `PAYNEST_ADMIN` | `paynest2026` | DBA maintenance — full DBA role |
+| Username | Purpose |
+|----------|---------|
+| `PAYNEST` | Schema owner — all DDL and DML |
+| `PAYNEST_APP` | API runtime — DML on all tables |
+| `PAYNEST_RO` | Analytics — SELECT only |
+| `PAYNEST_ADMIN` | DBA maintenance — full DBA role |
+
+> Passwords are not stored here. Set them via your `.env` file locally  
+> and via Vercel environment variables in production.
 
 ## Entity Relationships
 

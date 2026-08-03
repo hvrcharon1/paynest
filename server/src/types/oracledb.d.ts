@@ -6,6 +6,11 @@ declare module 'oracledb' {
     poolMin?: number
     poolMax?: number
     poolIncrement?: number
+    poolPingInterval?: number
+    poolTimeout?: number
+    // ADB mTLS (thin mode wallet support)
+    walletLocation?: string
+    walletPassword?: string
   }
 
   interface Pool {

@@ -10,9 +10,9 @@ import insightRoutes from './routes/insights.js'
 import dashboardRoutes from './routes/dashboard.js'
 import historyRoutes from './routes/history.js'
 
-const app = express()
-const PORT = parseInt(process.env.PORT || '3000', 10)
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173'
+
+export const app = express()
 
 app.use(cors({ origin: CORS_ORIGIN, credentials: true }))
 app.use(express.json())
@@ -31,31 +31,39 @@ app.use('/api/history', historyRoutes)
 
 app.use(errorHandler)
 
-async function start() {
-  try {
-    await initPool()
-    console.log('[DB] Oracle connection pool initialized')
+// Only start the HTTP server when run directly (local dev / standalone).
+// When imported as a module (Vercel serverless), this block is skipped.
+if (process.argv[1] && (
+  process.argv[1].endsWith('index.ts') ||
+  process.argv[1].endsWith('index.js')
+)) {
+  const PORT = parseInt(process.env.PORT || '3000', 10)
 
-    app.listen(PORT, () => {
-      console.log(`[Server] PayNest API running on http://localhost:${PORT}`)
-      console.log(`[Server] CORS allowed: ${CORS_ORIGIN}`)
-    })
-  } catch (err) {
-    console.error('[Fatal] Failed to start server:', err)
-    process.exit(1)
+  async function start() {
+    try {
+      await initPool()
+
+      app.listen(PORT, () => {
+        console.log(`[Server] PayNest API running on http://localhost:${PORT}`)
+        console.log(`[Server] CORS allowed: ${CORS_ORIGIN}`)
+      })
+    } catch (err) {
+      console.error('[Fatal] Failed to start server:', err)
+      process.exit(1)
+    }
   }
+
+  process.on('SIGTERM', async () => {
+    console.log('[Server] Shutting down...')
+    await closePool()
+    process.exit(0)
+  })
+
+  process.on('SIGINT', async () => {
+    console.log('[Server] Shutting down...')
+    await closePool()
+    process.exit(0)
+  })
+
+  start()
 }
-
-process.on('SIGTERM', async () => {
-  console.log('[Server] Shutting down...')
-  await closePool()
-  process.exit(0)
-})
-
-process.on('SIGINT', async () => {
-  console.log('[Server] Shutting down...')
-  await closePool()
-  process.exit(0)
-})
-
-start()
