@@ -61,11 +61,16 @@ export async function initPool(): Promise<void> {
 
   const walletPath = prepareWallet()
   if (walletPath) {
+    // walletLocation tells oracledb where cwallet.sso / ewallet.p12 lives.
+    // TNS_ADMIN tells oracledb where tnsnames.ora lives (same directory).
+    // Both must point at the extracted wallet directory.
     poolAttrs.walletLocation = walletPath
+    process.env.TNS_ADMIN = walletPath
     if (process.env.ORACLE_WALLET_PASSWORD) {
       poolAttrs.walletPassword = process.env.ORACLE_WALLET_PASSWORD
     }
     console.log('[DB] Using wallet at', walletPath)
+    console.log('[DB] TNS_ADMIN set to', walletPath)
   }
 
   console.log('[DB] Connecting as', user, 'to', connectString)
