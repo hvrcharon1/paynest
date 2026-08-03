@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { initPool, closePool } from './db.js'
+export { initPool } from './db.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import authRoutes from './routes/auth.js'
 import paymentMethodRoutes from './routes/paymentMethods.js'
