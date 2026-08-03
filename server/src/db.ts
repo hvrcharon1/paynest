@@ -2,7 +2,7 @@ import oracledb from 'oracledb'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
-import { execSync } from 'child_process'
+import AdmZip from 'adm-zip'
 
 let pool: oracledb.Pool | null = null
 let walletDir: string | null = null
@@ -24,10 +24,12 @@ function prepareWallet(): string | null {
   fs.mkdirSync(tmpBase,    { recursive: true })
   fs.mkdirSync(extractTo,  { recursive: true })
 
-  fs.writeFileSync(zipPath, Buffer.from(b64, 'base64'))
+  const zipBuf = Buffer.from(b64, 'base64')
+  fs.writeFileSync(zipPath, zipBuf)
 
-  // unzip is available on Vercel's Linux runtime
-  execSync(`unzip -o "${zipPath}" -d "${extractTo}"`, { stdio: 'ignore' })
+  // Pure-JS extraction — no system unzip binary required
+  const zip = new AdmZip(zipBuf)
+  zip.extractAllTo(extractTo, true)
 
   walletDir = extractTo
   console.log('[DB] Wallet extracted to', extractTo)
