@@ -258,6 +258,7 @@ END paynest_api_pkg;
 
 CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
 
+  -- ──────────────────────────────────────────────────────────
   FUNCTION next_due_date(
     p_due_day    IN NUMBER,
     p_frequency  IN VARCHAR2,
@@ -268,25 +269,32 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
     v_last_day  NUMBER;
     v_actual    NUMBER;
     v_candidate DATE;
+    v_day_name  VARCHAR2(10);
   BEGIN
+    -- FIX: DECODE replaced with CASE — DECODE is SQL-only in ADB
+    IF p_frequency IN ('weekly', 'biweekly') THEN
+      v_day_name := CASE MOD(p_due_day - 1, 7)
+                      WHEN 0 THEN 'MONDAY'
+                      WHEN 1 THEN 'TUESDAY'
+                      WHEN 2 THEN 'WEDNESDAY'
+                      WHEN 3 THEN 'THURSDAY'
+                      WHEN 4 THEN 'FRIDAY'
+                      WHEN 5 THEN 'SATURDAY'
+                      ELSE        'SUNDAY'
+                    END;
+    END IF;
+
     IF p_frequency = 'weekly' THEN
-      v_candidate := NEXT_DAY(p_after_date,
-        DECODE(MOD(p_due_day - 1, 7),
-          0, 'MONDAY', 1, 'TUESDAY', 2, 'WEDNESDAY',
-          3, 'THURSDAY', 4, 'FRIDAY', 5, 'SATURDAY', 'SUNDAY'));
-      RETURN v_candidate;
+      RETURN NEXT_DAY(p_after_date, v_day_name);
 
     ELSIF p_frequency = 'biweekly' THEN
-      v_candidate := NEXT_DAY(p_after_date,
-        DECODE(MOD(p_due_day - 1, 7),
-          0, 'MONDAY', 1, 'TUESDAY', 2, 'WEDNESDAY',
-          3, 'THURSDAY', 4, 'FRIDAY', 5, 'SATURDAY', 'SUNDAY'));
-      RETURN v_candidate + 7;
+      RETURN NEXT_DAY(p_after_date, v_day_name) + 7;
 
     ELSIF p_frequency = 'one_time' THEN
       RETURN p_after_date + 3650;
 
     ELSE
+      -- monthly / quarterly / annually
       DECLARE
         v_months_add NUMBER := CASE p_frequency
                                  WHEN 'quarterly' THEN 3
@@ -313,6 +321,7 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
     END IF;
   END next_due_date;
 
+  -- ──────────────────────────────────────────────────────────
   PROCEDURE refresh_notifications(p_user_id IN VARCHAR2) IS
     v_days  NUMBER;
     v_id    VARCHAR2(50);
@@ -354,6 +363,7 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
     COMMIT;
   END refresh_notifications;
 
+  -- ──────────────────────────────────────────────────────────
   PROCEDURE mark_service_paid(
     p_service_id IN VARCHAR2,
     p_user_id    IN VARCHAR2
@@ -388,6 +398,7 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
       RAISE_APPLICATION_ERROR(-20001, 'Service not found: ' || p_service_id);
   END mark_service_paid;
 
+  -- ──────────────────────────────────────────────────────────
   FUNCTION payment_health_score(p_user_id IN VARCHAR2) RETURN NUMBER IS
     v_overdue  NUMBER := 0;
     v_near_due NUMBER := 0;
@@ -406,6 +417,7 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
     RETURN GREATEST(0, LEAST(100, 100 - (v_overdue * 14) - (v_near_due * 5)));
   END payment_health_score;
 
+  -- ──────────────────────────────────────────────────────────
   PROCEDURE generate_insights(p_user_id IN VARCHAR2) IS
     v_total    NUMBER := 0;
     v_score    NUMBER;
@@ -414,24 +426,23 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
     v_top_cat  VARCHAR2(50);
     v_top_pct  NUMBER;
     v_ins_id   VARCHAR2(50);
-
-    FUNCTION monthly_amount(p_amt NUMBER, p_freq VARCHAR2) RETURN NUMBER IS
-    BEGIN
-      RETURN CASE p_freq
-        WHEN 'weekly'    THEN p_amt * 52  / 12
-        WHEN 'biweekly'  THEN p_amt * 26  / 12
-        WHEN 'monthly'   THEN p_amt
-        WHEN 'quarterly' THEN p_amt / 3
-        WHEN 'annually'  THEN p_amt / 12
-        ELSE p_amt
-      END;
-    END;
+    -- FIX: monthly_amount moved out of SQL — inline CASE used in all queries below
   BEGIN
     DELETE FROM paynest.ai_insights
     WHERE  user_id = p_user_id
       AND  generated_at < CURRENT_TIMESTAMP - INTERVAL '24' HOUR;
 
-    SELECT NVL(SUM(monthly_amount(amount, frequency)), 0)
+    -- FIX: monthly_amount(amount, frequency) inlined as CASE expression
+    SELECT NVL(SUM(
+      CASE frequency
+        WHEN 'weekly'    THEN amount * 52  / 12
+        WHEN 'biweekly'  THEN amount * 26  / 12
+        WHEN 'monthly'   THEN amount
+        WHEN 'quarterly' THEN amount / 3
+        WHEN 'annually'  THEN amount / 12
+        ELSE amount
+      END
+    ), 0)
     INTO   v_total
     FROM   paynest.external_services
     WHERE  user_id = p_user_id AND status != 'paused';
@@ -445,13 +456,29 @@ CREATE OR REPLACE PACKAGE BODY paynest.paynest_api_pkg AS
     WHERE  user_id = p_user_id AND status = 'active' AND autopay_enabled = 0;
 
     BEGIN
+      -- FIX: monthly_amount inlined in both SELECT list and ORDER BY
       SELECT category,
-             ROUND(SUM(monthly_amount(amount, frequency)) / NULLIF(v_total, 0) * 100, 1)
+             ROUND(
+               SUM(CASE frequency
+                     WHEN 'weekly'    THEN amount * 52  / 12
+                     WHEN 'biweekly'  THEN amount * 26  / 12
+                     WHEN 'monthly'   THEN amount
+                     WHEN 'quarterly' THEN amount / 3
+                     WHEN 'annually'  THEN amount / 12
+                     ELSE amount
+                   END) / NULLIF(v_total, 0) * 100, 1)
       INTO   v_top_cat, v_top_pct
       FROM   paynest.external_services
       WHERE  user_id = p_user_id AND status != 'paused'
       GROUP  BY category
-      ORDER  BY SUM(monthly_amount(amount, frequency)) DESC
+      ORDER  BY SUM(CASE frequency
+                      WHEN 'weekly'    THEN amount * 52  / 12
+                      WHEN 'biweekly'  THEN amount * 26  / 12
+                      WHEN 'monthly'   THEN amount
+                      WHEN 'quarterly' THEN amount / 3
+                      WHEN 'annually'  THEN amount / 12
+                      ELSE amount
+                    END) DESC
       FETCH  FIRST 1 ROW ONLY;
     EXCEPTION WHEN NO_DATA_FOUND THEN v_top_cat := NULL; v_top_pct := 0;
     END;
